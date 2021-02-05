@@ -1,0 +1,259 @@
+
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <LiquidCrystal.h>
+
+//Lcd
+const int en=2,rw=1,rs=0,d4=4,d5=5,d6=6,d7=7,bl=3;
+const int i2c_addr = 0x27;
+LiquidCrystal_I2C lcd(i2c_addr,en,rw,rs,d4,d5,d6,d7,bl, POSITIVE);
+
+
+//soil sensors
+const int dry1 = 797; //dry sensor1
+const int wet1 = 377; //wet sensor1
+const int dry2 = 797; //dry sensor2
+const int wet2 = 44; //wet sensor2
+const int dry3 = 797; //dry sensor3
+const int wet3 = 396; //wet sensor3
+const int dry4 = 794; //dry sensor4
+const int wet4 = 410; //wet sensor4
+const int dry5 = 716; //dry sensor5
+const int wet5 = 366; //wet sensor5
+
+//relay pins
+const int relayPin1=2;
+const int relayPin2=3;
+const int relayPin3=4;
+const int relayPin4=5;
+const int relayPin5=6;
+
+// pot maax/min
+const int potH  = 999;
+const int potL = 30;
+
+
+// averaging value to stop noise
+#define Num_of_Readings 30
+int Index1 = 0;
+int Value1 = 0;
+int Sum1 = 0;
+int Reading1[Num_of_Readings];
+int Averaged1 = 0;
+
+int Index2 = 0;
+int Value2 = 0;
+int Sum2 = 0;
+int Reading2[Num_of_Readings];
+int Averaged2 = 0;
+
+int Index3 = 0;
+int Value3 = 0;
+int Sum3 = 0;
+int Reading3[Num_of_Readings];
+int Averaged3 = 0;
+
+int Index4 = 0;
+int Value4 = 0;
+int Sum4 = 0;
+int Reading4[Num_of_Readings];
+int Averaged4 = 0;
+
+int Index5 = 0;
+int Value5 = 0;
+int Sum5 = 0;
+int Reading5[Num_of_Readings];
+int Averaged5 = 0;
+
+void setup() {
+  // put your setup code here, to run once:
+Serial.begin(9600);
+
+// turn all relays off
+
+pinMode(relayPin1, OUTPUT);
+digitalWrite(relayPin1,LOW);
+
+pinMode(relayPin2, OUTPUT);
+digitalWrite(relayPin2,LOW);
+
+pinMode(relayPin3, OUTPUT);
+digitalWrite(relayPin3,LOW);
+
+pinMode(relayPin4, OUTPUT);
+digitalWrite(relayPin4,LOW);
+
+pinMode(relayPin5, OUTPUT);
+digitalWrite(relayPin5,LOW);
+
+//turn lcd on
+lcd.begin(16,2);
+lcd.setCursor(0,0);
+lcd.print("Hello Human");
+lcd.setCursor(0,1);
+lcd.print("You look Nice");
+delay(8000);
+lcd.clear();
+
+//  pot input
+pinMode(A7, INPUT);
+
+}
+void loop() {
+
+ // desired moisture level
+ 
+ int sensorVal6 = analogRead(A7);
+
+ int sensorValue = map(sensorVal6,potH, potL, 100, 0);
+ Serial.println(sensorValue);
+  
+int desMoist = sensorValue;
+
+//sensor 1
+   
+  Sum1 = Sum1 - Reading1[Index1];          // Remove the oldest entry from the sum
+  Value1 = analogRead(A0);                 // Read the next sensor value
+  Reading1[Index1] = Value1;                // Add the newest reading to the window
+  Sum1 = Sum1 + Value1;                    // Add the newest reading to the sum
+  Index1 = (Index1+1) % Num_of_Readings;   // Increment the index, and wrap to 0 if it exceeds the window size
+
+  Averaged1 = Sum1 / Num_of_Readings;      // Divide the sum of the window by the window size for the result
+
+  Serial.print(Value1);
+  Serial.print(",");
+  Serial.println(Averaged1);
+  
+  int sensorVal1 = analogRead(A0);
+  Serial.println(sensorVal1);
+  //setup of pecentage scale
+  int moistPercentage1 = map(Averaged1, wet1, dry1, 100, 0);
+Serial.print(moistPercentage1);
+Serial.println("%");
+if(moistPercentage1 <= desMoist){digitalWrite(relayPin1, HIGH);
+  }
+else{digitalWrite(relayPin1, LOW);}
+
+
+// Sensor 2
+
+  Sum2 = Sum2 - Reading2[Index2];          // Remove the oldest entry from the sum
+  Value2 = analogRead(A0);                 // Read the next sensor value
+  Reading2[Index2] = Value2;                // Add the newest reading to the window
+  Sum2 = Sum2 + Value2;                    // Add the newest reading to the sum
+  Index2 = (Index2+1) % Num_of_Readings;   // Increment the index, and wrap to 0 if it exceeds the window size
+
+  Averaged2 = Sum2 / Num_of_Readings;      // Divide the sum of the window by the window size for the result
+
+  Serial.print(Value2);
+  Serial.print(",");
+  Serial.println(Averaged2);
+  
+  int sensorVal2 = analogRead(A1);
+  Serial.println(sensorVal2);
+  //setup of pecentage scale
+  int moistPercentage2 = map(Averaged2, wet1, dry1, 100, 0);
+Serial.print(moistPercentage2);
+Serial.println("%");
+if(moistPercentage2 <= desMoist){digitalWrite(relayPin2, HIGH);
+  }
+else{digitalWrite(relayPin2, LOW);}
+
+// Sensor 3
+
+  Sum3 = Sum3 - Reading3[Index3];          // Remove the oldest entry from the sum
+  Value3 = analogRead(A2);                 // Read the next sensor value
+  Reading3[Index3] = Value3;                // Add the newest reading to the window
+  Sum3 = Sum3 + Value3;                    // Add the newest reading to the sum
+  Index3 = (Index3+1) % Num_of_Readings;   // Increment the index, and wrap to 0 if it exceeds the window size
+
+  Averaged3 = Sum3 / Num_of_Readings;      // Divide the sum of the window by the window size for the result
+
+  Serial.print(Value3);
+  Serial.print(",");
+  Serial.println(Averaged2);
+  
+  int sensorVal3 = analogRead(A2);
+  Serial.println(sensorVal3);
+  //setup of pecentage scale
+  int moistPercentage3 = map(Averaged3, wet1, dry1, 100, 0);
+Serial.print(moistPercentage3);
+Serial.println("%");
+if(moistPercentage3 <= desMoist){digitalWrite(relayPin3, HIGH);
+  }
+else{digitalWrite(relayPin3, LOW);}
+
+// Sensor 4
+
+  Sum4 = Sum4 - Reading4[Index4];          // Remove the oldest entry from the sum
+  Value4 = analogRead(A3);                 // Read the next sensor value
+  Reading4[Index4] = Value4;                // Add the newest reading to the window
+  Sum4 = Sum4 + Value4;                    // Add the newest reading to the sum
+  Index4 = (Index4+1) % Num_of_Readings;   // Increment the index, and wrap to 0 if it exceeds the window size
+
+  Averaged4 = Sum4 / Num_of_Readings;      // Divide the sum of the window by the window size for the result
+
+  Serial.print(Value4);
+  Serial.print(",");
+  Serial.println(Averaged4);
+  
+  int sensorVal4 = analogRead(A3);
+  Serial.println(sensorVal4);
+  //setup of pecentage scale
+  int moistPercentage4 = map(Averaged4, wet1, dry1, 100, 0);
+Serial.print(moistPercentage4);
+Serial.println("%");
+if(moistPercentage4 <= desMoist){digitalWrite(relayPin4, HIGH);
+  }
+else{digitalWrite(relayPin4, LOW);}
+
+// Sensor 5
+
+  Sum5 = Sum5 - Reading5[Index5];          // Remove the oldest entry from the sum
+  Value5 = analogRead(A6);                 // Read the next sensor value
+  Reading5[Index5] = Value5;                // Add the newest reading to the window
+  Sum5 = Sum5 + Value5;                    // Add the newest reading to the sum
+  Index5 = (Index5+1) % Num_of_Readings;   // Increment the index, and wrap to 0 if it exceeds the window size
+
+  Averaged5 = Sum5 / Num_of_Readings;      // Divide the sum of the window by the window size for the result
+
+  Serial.print(Value5);
+  Serial.print(",");
+  Serial.println(Averaged5);
+  
+  int sensorVal5 = analogRead(A6);
+  Serial.println(sensorVal5);
+  //setup of pecentage scale
+  int moistPercentage5 = map(Averaged5, wet1, dry1, 100, 0);
+Serial.print(moistPercentage5);
+Serial.println("%");
+if(moistPercentage5 <= desMoist){digitalWrite(relayPin5, HIGH);
+  }
+else{digitalWrite(relayPin5, LOW);}
+
+delay(500);
+
+//Avereage moisture Reading
+
+int AvgMoist = ((moistPercentage1+moistPercentage2+moistPercentage3+moistPercentage4+moistPercentage5)/5);
+ Serial.print(AvgMoist);
+ Serial.println("%");
+ Serial.println(" ");
+
+ // lcd Read outs
+ lcd.clear();
+ lcd.setCursor(0,0);
+ lcd.print("Avg Moist ");
+ lcd.setCursor(10,0);
+ lcd.print(AvgMoist);
+ lcd.setCursor(13,0);
+ lcd.print("%");
+ lcd.setCursor(0,1);
+ lcd.print("Des Moist");
+ lcd.setCursor(10,1);
+ lcd.print(desMoist);
+ lcd.setCursor(13,1);
+ lcd.print("%");
+
+
+}
